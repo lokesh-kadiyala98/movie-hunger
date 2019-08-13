@@ -1,0 +1,99 @@
+@import url(//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css);
+.lato {
+  font-family: lato;
+  word-spacing: .3em;
+}
+.container a {
+  text-decoration: none;
+}
+hr {
+  border-top: .5px solid #606060;
+}
+body {
+  background-color: black;
+  color: white;
+}
+.carousel-inner img {
+  width: 100%;
+  height: 100vh;
+  object-fit: cover;
+}
+.carousel-caption {
+  background-color: rgba(0, 0, 0, 0.49);
+  font-family: 'Lato', sans-serif;
+  word-spacing: .1em;
+}
+.add-tag {
+  background-color: #17a2b8;
+  padding: 3px 6px;
+  border-radius: 10px;
+}
+.delete-tag{
+  background-color: #dc3545;
+  padding: 3px 6px;
+  border-radius: 10px;
+}
+.fa {
+  color: white;
+}
+.checked {
+  color: #f39c12;
+}
+.line {
+  border-bottom: 1px solid #fff;
+  margin: 0 auto;
+}
+.rating {
+  display: flex;
+  flex-direction: row-reverse;
+  width: 450px;
+  min-height: 70px;
+}
+.rating label {
+  display: flex;
+  flex: 1;
+  position: relative;
+  cursor: pointer;
+}
+.rating label:after {
+  font-family: 'FontAwesome';
+  transition: all 0.4s ease-out;
+  -webkit-font-smoothing: antialiased;
+  position: absolute;
+  content: "\f006";
+  color: #f1c40f;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  font-size: 70px;
+  line-height: 1;
+}
+.rating label:hover:after {
+  color: #9a7c00;
+}
+.rating input {
+  display: none;
+}
+.rating input:checked + label:after,
+.rating input:checked ~ label:after {
+  content: "\f005";
+  text-shadow: 0 0 20px #F9BF3B;
+  text-shadow: 2px 2px 2px rgb(0, 0, 0, 0.6);
+}
+.gold {
+  color: #FFD700;
+}
+.size-large {
+  font-size: xx-large;
+}
+.display-4 {
+  font-size: 3rem!important;
+}
+.display-6 {
+  font-size: 2rem!important;
+}
+.end {
+    margin-bottom: 50px;
+}
