@@ -228,6 +228,11 @@
 				$results = mysqli_query($dbc, $query) or die("cant issue query");
 				$movieAvgRating = mysqli_fetch_array($results);
 
+				$query = "SELECT m.id id, title, count(*) count FROM movies m, movie_genre mg WHERE m.id=mg.movie_id AND mg.genre_id IN
+									(SELECT genre_id FROM movie_genre WHERE movie_id=".$_GET['movieId'].") GROUP BY id ORDER BY count(*) DESC LIMIT 8 OFFSET 1";
+				$results = mysqli_query($dbc, $query);
+				$similarMovies = $results;
+
 				$query = "(SELECT CONCAT(u.firstName,' ',u.lastName) AS userName, u.id, DATE_FORMAT(timeStamp, \"%b %D, %Y\") AS timeStamp, rating, review, '<i class=\"gold fas fa-award\"></i>' AS activeUser
 										FROM movies AS m, director AS d, users AS u, movie_reviews AS mr
 										WHERE m.director_id=d.id AND m.id=mr.movie_id AND mr.user_id=u.id AND u.active_user=1 AND mr.review IS NOT NULL AND m.id=".$_GET['movieId'].")
@@ -281,6 +286,16 @@
 ?>
 						</div>
 					</div><hr>
+
+					<div class="h4">Similar Movies</div><hr/>
+					<div class="row">
+<?php
+						while($row = mysqli_fetch_array($similarMovies)){
+							echo '<a href="userView.php?movieId='.$row['id'].'"><img style="width: 100px;" class="mr-3 mb-2" src="../images/posters/'.$row['title'].'(main).jpg"></a>';
+						}
+?>
+					</div>
+
 					<div class="h4" id="reviewSection">Reviews</div><hr><br>
 <?php
 

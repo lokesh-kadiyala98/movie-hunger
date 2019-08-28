@@ -1,6 +1,37 @@
 <?php
   session_start();
 
+  function showGenres(){
+?>
+
+    <div class="dropdown float-right">
+      Show by:  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Genre</button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenu1">
+        <a class="dropdown-item" href="userSearch.php?genreId=1">Action</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=2">Adventure</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=8">Animation</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=12">Biography</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=3">Comedy</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=9">Crime</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=6">Drama</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=14">Family</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=7">Fantasy</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=15">History</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=13">Horror</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=17">Musical</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=11">Mystery</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=4">Romance</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=5">Sci-Fi</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=18">Short</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=10">Thriller</a>
+        <a class="dropdown-item" href="userSearch.php?genreId=16">War</a>
+      </div>
+    </div>
+    <br><br>
+
+<?php
+  }
+
   function showAllResults(){
 
     $dbc = mysqli_connect('localhost','root','Jyothi123','movie_hunger') or die("Couldn't connect to databse");
@@ -27,32 +58,9 @@
     $results = mysqli_query($dbc, $query);
 
     echo '<div class="container">';
-?>
-    <div class="dropdown float-right">
-      Sort by:  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Genre</button>
-      <div class="dropdown-menu" aria-labelledby="dropdownMenu1">
-        <a class="dropdown-item" href="userSearch.php?genreId=1">Action</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=2">Adventure</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=8">Animation</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=12">Biography</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=3">Comedy</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=9">Crime</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=6">Drama</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=14">Family</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=7">Fantasy</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=15">History</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=13">Horror</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=17">Musical</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=11">Mystery</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=4">Romance</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=5">Sci-Fi</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=18">Short</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=10">Thriller</a>
-        <a class="dropdown-item" href="userSearch.php?genreId=16">War</a>
-      </div>
-    </div>
-    <br><br>
-<?php
+
+    showGenres();
+
     if(isset($_GET['genreId'])){
       $query = "SELECT m.id, title, description , CONCAT(d.firstName, ' ', d.lastName) AS dirName, g.name FROM movies as m, director as d, genres as g, movie_genre as mg
                 WHERE m.director_id=d.id AND m.id=mg.movie_id AND mg.genre_id=g.id AND g.id=".$_GET['genreId']." LIMIT ".$from.", ".$stepSize;
@@ -187,6 +195,7 @@
           $results = mysqli_query($dbc, $query);
 
           echo '<div class="container">';
+          showGenres();
           while($row = mysqli_fetch_array($results)){
             ?>
             <a href="userView.php?movieId=<?php echo $row['id']; ?>">
@@ -244,29 +253,7 @@
     }else if(!isset($_GET['genreId']) && !isset($_GET['curPage']) && empty($_GET['searchString']) && !isset($_GET['actorSearch']) && !isset($_GET['directorSearch'])){//if the searchString is empty show search bars
       //showAllResults()
       echo '<div class="container">';
-      echo '<div class="dropdown float-right">
-            Sort by:  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Genre</button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenu1">
-              <a class="dropdown-item" href="userSearch.php?genreId=1">Action</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=2">Adventure</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=8">Animation</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=12">Biography</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=3">Comedy</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=9">Crime</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=6">Drama</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=14">Family</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=7">Fantasy</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=15">History</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=13">Horror</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=17">Musical</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=11">Mystery</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=4">Romance</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=5">Sci-Fi</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=18">Short</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=10">Thriller</a>
-              <a class="dropdown-item" href="userSearch.php?genreId=16">War</a>
-            </div>
-          </div>';
+      showGenres();
       echo '<div class="py-5"><form action="userSearch.php">';
       echo '<div class="form-group">
           <label for="name">Movie Search</label>

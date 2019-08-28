@@ -103,7 +103,7 @@
 					<div class=" row">
 						<img style=" max-height: 150px; " class=" img-thumbnail mr-4 mt-4" src="images/utill/<?php echo $row['gender'] ?>.png" alt="Thumbnail image">
 						<div class=" lato col">
-							<h1 class=" col-xs-10 mt-4 col-sm-14 col-md-7 col-lg-8 col-lg-offset-1 display-4 mb-0 "><?php echo $row['firstName']." ".$row['lastName']; ?></h1><br>
+							<h1 class=" col-xs-10 col-md-7 col-lg-8 col-lg-offset-1 display-4 mt-4 mb-0  "><?php echo $row['firstName']." ".$row['lastName']; ?></h1><br>
 							<h5><?php echo $row['bio']."<br>"; ?></h5>
 						</div>
 					</div>
@@ -134,7 +134,7 @@
 					<div class=" row">
 						<img style=" max-height: 150px; " class=" img-thumbnail mr-4 mt-4" src="images/utill/<?php echo $row['gender'] ?>.png" alt="Thumbnail image">
 						<div class=" lato col">
-							<h1 class=" col-xs-10 mt-4 col-sm-14 col-md-7 col-lg-8 col-lg-offset-1 display-4 mb-0 "><?php echo $row['firstName']." ".$row['lastName']; ?></h1><br>
+							<h1 class="col-xs-10 col-md-7 col-lg-8 col-lg-offset-1 display-4 mt-4 mb-0"><?php echo $row['firstName']." ".$row['lastName']; ?></h1><br>
 							<h5><?php getRating($row['rating']); echo "<br>".$row['bio']."<br>"; ?></h5>
 						</div>
 					</div>
@@ -172,6 +172,11 @@
 				$results = mysqli_query($dbc, $query) or die("cant issue query");
 				$movieAvgRating = mysqli_fetch_array($results);
 
+				$query = "SELECT m.id id, title, count(*) count FROM movies m, movie_genre mg WHERE m.id=mg.movie_id AND mg.genre_id IN
+									(SELECT genre_id FROM movie_genre WHERE movie_id=".$_GET['movieId'].") GROUP BY id ORDER BY count(*) DESC LIMIT 8 OFFSET 1";
+				$results = mysqli_query($dbc, $query);
+				$similarMovies = $results;
+
 				$query = "(SELECT CONCAT(u.firstName,' ',u.lastName) AS userName, u.id, DATE_FORMAT(timeStamp, \"%b %D, %Y\") AS timeStamp, rating, review, '<i class=\"gold fas fa-award\"></i>' AS activeUser
 										FROM movies AS m, director AS d, users AS u, movie_reviews AS mr
 										WHERE m.director_id=d.id AND m.id=mr.movie_id AND mr.user_id=u.id AND u.active_user=1 AND mr.review IS NOT NULL AND m.id=".$_GET['movieId'].")
@@ -186,7 +191,7 @@
 				<div class="container" style="margin-bottom: 50px;">
 					<div class="row">
 						<img style=" max-height: 400px; " class="img-thumbnail mr-4 mt-4" src="images/posters/<?php echo $movieDirector['title'] ?>(main).jpg" alt="Thumbnail image">
-						<div class="col-xs-10 mt-4 col-sm-14 col-md-7 col-lg-8 col-lg-offset-1">
+						<div class="col-xs-10 mt-4 col-md-7 col-lg-8 col-lg-offset-1">
 							<h1 class="display-4"><?php echo $movieDirector['title'] ?></h1> <br>
 							<h5><?php echo $movieDirector['releasedYear']."<br><br>";
 
@@ -221,14 +226,23 @@
 							<div class="h4 mb-3">Main Cast</div><hr>
 <?php
 							while($actor = mysqli_fetch_array($movieActors)){
-
-								echo '<div  class="mb-2"><a href="view.php?actorId='.$actor['id'].'">'.$actor['firstName'].' '.$actor['lastName'].'</a> <span class="mr-2 ml-2" >as</span> <span class="text-muted">'.$actor['played'].'</span></div>';
-
+								echo '<div class="mb-2"><a href="view.php?actorId='.$actor['id'].'">'.$actor['firstName'].' '.$actor['lastName'].'</a> <span class="mr-2 ml-2" >as</span> <span class="text-muted">'.$actor['played'].'</span></div>';
 							}
 
 ?>
 						</div>
-					</div><hr>
+					</div><hr/>
+
+					<div class="h4">Similar Movies</div><hr/>
+					<div class="row">
+<?php
+						while($row = mysqli_fetch_array($similarMovies)){
+							echo '<a href="view.php?movieId='.$row['id'].'"><img style="width: 100px;" class="mr-3 mb-2" src="images/posters/'.$row['title'].'(main).jpg"></a>';
+						}
+?>
+					</div>
+
+					<hr/>
 					<div class="h4" id="reviewSection">Reviews</div><hr>
 <?php
 					while($row = mysqli_fetch_array($movieReviews)){

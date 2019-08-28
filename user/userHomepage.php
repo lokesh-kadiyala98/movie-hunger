@@ -69,9 +69,12 @@
 
                 function showcase(){//display top movies based on most reviews
 
-                    //$query = "SELECT * FROM movies LIMIT 28,3";
                     $query ="SELECT id, title, description, COUNT(*) FROM movies, movie_reviews WHERE movies.id=movie_reviews.movie_id GROUP BY movie_reviews.movie_id ORDER BY COUNT(*) DESC LIMIT 3";
                     $trendingMovies = mysqli_query($GLOBALS['dbc'], $query) or die("Couldn't issue SELECT query at line 66");
+
+                    $query = "SELECT id FROM users WHERE email='".$_SESSION['email']."'";
+                    $userId = mysqli_query($GLOBALS['dbc'], $query);
+                    $userId = mysqli_fetch_array($userId)['id'];
 
                     $row = mysqli_fetch_array($trendingMovies);
                     $id1 = $row['id'];
@@ -98,10 +101,24 @@
                     $topPicks = mysqli_query($GLOBALS['dbc'], $query) or die("couldnt issue query at personalize genres");//based on favourite genres
 
                     $query = "SELECT CONCAT(d2.firstName, ' ', d2.lastName) AS directorName, title, m2.id AS movieId FROM movies AS m2, director AS d2 WHERE m2.director_id=d2.id AND m2.id NOT IN
-                              (SELECT movie_id FROM movie_reviews WHERE user_id=(SELECT id FROM users WHERE email='".$_SESSION['email']."') ) AND d2.id IN
+                              (SELECT movie_id FROM movie_reviews WHERE user_id=".$userId." ) AND d2.id IN
                               (SELECT DISTINCT m1.director_id FROM movies as m1 WHERE m1.id in
-                              (SELECT mr.movie_id FROM movie_reviews as mr WHERE mr.rating>4 AND mr.user_id=(SELECT id FROM users WHERE email='".$_SESSION['email']."') ) )";
+                              (SELECT mr.movie_id FROM movie_reviews as mr WHERE mr.rating>4 AND mr.user_id=".$userId." ) )";
                     $movieSuggestions = mysqli_query($GLOBALS['dbc'], $query) or die ("couldn't issue movie suggestions query");//based on review given to a movie
+
+                    $query = "SELECT DISTINCT(m.id) movieId, m.title, m.description FROM users u, movie_reviews mr, movies m
+                              WHERE u.id=mr.user_id AND mr.movie_id=m.id AND mr.movie_id NOT IN
+                              (SELECT curr_user_mr.movie_id FROM movie_reviews curr_user_mr where curr_user_mr.user_id=".$userId.")
+                              AND u.id IN
+                              (SELECT * FROM (SELECT similar_user.user_id FROM movie_reviews curr_user, movie_reviews similar_user
+                              	WHERE curr_user.user_id=".$userId." AND
+                              		curr_user.rating=similar_user.rating AND
+                              			curr_user.movie_id=similar_user.movie_id AND
+                              				similar_user.user_id != curr_user.user_id AND
+                              					curr_user.rating BETWEEN 3 AND 5
+                              GROUP BY similar_user.user_id HAVING COUNT(*)>2 ORDER BY COUNT(similar_user.user_id) DESC LIMIT 4) AS temp)
+                              LIMIT 10";
+                    $collaborativeFiltering = mysqli_query($GLOBALS['dbc'], $query) or die('couldn\'t execute coll');
 
              ?>
                     <div class="container">
@@ -150,6 +167,7 @@
                         </div>
                         <hr>
              <?php
+                        //recommend based on fav genres
                         if(mysqli_num_rows($topPicks)){
                             echo '<div class="display-3 text-light">Top Picks</div>';
                             echo '<h5 class="lato mb-3 text-secondary">Based on your favourite genres.</h5>';
@@ -166,6 +184,27 @@
                             }
                         }
 
+                        //recommend based on collaborativeFiltering
+                        if(mysqli_num_rows($collaborativeFiltering)){
+                          echo '<div class="display-3 text-light">You Must Look into</div>';
+                          echo '<h5 class="lato mb-3 text-secondary">Based on your interests.</h5>';
+                          while($row = mysqli_fetch_array($collaborativeFiltering)) {
+
+                            echo '<a href="userView.php?movieId='.$row['movieId'].'">';
+                            echo '<div class="media mb-3">';
+                            echo '<img style=" width:100px;" class="mr-3 align-self-center" src="../images/posters/'.$row['title'].'(main).jpg">';
+                            echo '<div class="media-body  text-white">';
+                            echo '<h5>'.$row['title'].'</h5>';
+                            echo '<div class="text-secondary">'.$row['description'].'</div>';
+                            echo '</div>';
+                            echo '</div>';
+                            echo '</a>';
+
+                          }
+                        }
+
+
+                        //recommend based on reviews
                         $nextDirectorName = "";
 
                         if(mysqli_num_rows($movieSuggestions)) {
@@ -187,7 +226,7 @@
                             $nextDirectorName = $row['directorName'];
                           }
                         }
-                        echo '</div>';  //end of container at line 106
+                        echo '</div>';
                 }//end of showcase
 
                 if(isset($_POST['signupProcess'])){

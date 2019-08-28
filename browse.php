@@ -1,6 +1,37 @@
 <?php
 session_start();
 
+function showGenres(){
+?>
+
+  <div class="dropdown float-right">
+    Show by:  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Genre</button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenu1">
+      <a class="dropdown-item" href="browse.php?genreId=1">Action</a>
+      <a class="dropdown-item" href="browse.php?genreId=2">Adventure</a>
+      <a class="dropdown-item" href="browse.php?genreId=8">Animation</a>
+      <a class="dropdown-item" href="browse.php?genreId=12">Biography</a>
+      <a class="dropdown-item" href="browse.php?genreId=3">Comedy</a>
+      <a class="dropdown-item" href="browse.php?genreId=9">Crime</a>
+      <a class="dropdown-item" href="browse.php?genreId=6">Drama</a>
+      <a class="dropdown-item" href="browse.php?genreId=14">Family</a>
+      <a class="dropdown-item" href="browse.php?genreId=7">Fantasy</a>
+      <a class="dropdown-item" href="browse.php?genreId=15">History</a>
+      <a class="dropdown-item" href="browse.php?genreId=13">Horror</a>
+      <a class="dropdown-item" href="browse.php?genreId=17">Musical</a>
+      <a class="dropdown-item" href="browse.php?genreId=11">Mystery</a>
+      <a class="dropdown-item" href="browse.php?genreId=4">Romance</a>
+      <a class="dropdown-item" href="browse.php?genreId=5">Sci-Fi</a>
+      <a class="dropdown-item" href="browse.php?genreId=18">Short</a>
+      <a class="dropdown-item" href="browse.php?genreId=10">Thriller</a>
+      <a class="dropdown-item" href="browse.php?genreId=16">War</a>
+    </div>
+  </div>
+  <br><br>
+
+<?php
+}
+
 function showAllResults(){
 
       $dbc = mysqli_connect('localhost','root','Jyothi123','movie_hunger') or die("Couldn't connect to databse");
@@ -11,6 +42,8 @@ function showAllResults(){
       }else{
         $query = "SELECT * FROM movies";
       }
+
+      //query to check number of movies available in DB; therefore use it for pagination
       $results = mysqli_query($dbc, $query);
       $noOfResults = mysqli_num_rows($results);
 
@@ -22,34 +55,10 @@ function showAllResults(){
 
       $from = $curPage * $stepSize;
       $reqPages = ceil($noOfResults / $stepSize);
-      echo '<div class="container">';
 
-?>
-      <div class="dropdown float-right">
-        Sort by:  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Genre</button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenu1">
-          <a class="dropdown-item" href="browse.php?genreId=1">Action</a>
-          <a class="dropdown-item" href="browse.php?genreId=2">Adventure</a>
-          <a class="dropdown-item" href="browse.php?genreId=8">Animation</a>
-          <a class="dropdown-item" href="browse.php?genreId=12">Biography</a>
-          <a class="dropdown-item" href="browse.php?genreId=3">Comedy</a>
-          <a class="dropdown-item" href="browse.php?genreId=9">Crime</a>
-          <a class="dropdown-item" href="browse.php?genreId=6">Drama</a>
-          <a class="dropdown-item" href="browse.php?genreId=14">Family</a>
-          <a class="dropdown-item" href="browse.php?genreId=7">Fantasy</a>
-          <a class="dropdown-item" href="browse.php?genreId=15">History</a>
-          <a class="dropdown-item" href="browse.php?genreId=13">Horror</a>
-          <a class="dropdown-item" href="browse.php?genreId=17">Musical</a>
-          <a class="dropdown-item" href="browse.php?genreId=11">Mystery</a>
-          <a class="dropdown-item" href="browse.php?genreId=4">Romance</a>
-          <a class="dropdown-item" href="browse.php?genreId=5">Sci-Fi</a>
-          <a class="dropdown-item" href="browse.php?genreId=18">Short</a>
-          <a class="dropdown-item" href="browse.php?genreId=10">Thriller</a>
-          <a class="dropdown-item" href="browse.php?genreId=16">War</a>
-        </div>
-      </div>
-      <br><br>
-<?php
+      echo '<div class="container">';
+      showGenres();
+
       if(isset($_GET['genreId'])){
         $query = "SELECT m.id, title, description , CONCAT(d.firstName, ' ', d.lastName) AS dirName, g.name FROM movies as m, director as d, genres as g, movie_genre as mg
                   WHERE m.director_id=d.id AND m.id=mg.movie_id AND mg.genre_id=g.id AND g.id=".$_GET['genreId']." LIMIT ".$from.", ".$stepSize;
@@ -75,6 +84,7 @@ function showAllResults(){
 <?php
           }
 ?>
+          <!-- pagination logic -->
           <nav aria-label="Page navigation example">
             <ul class="pagination justify-content-end">
               <li class="page-item  <?php if($curPage+1 == 1) echo " disabled"; ?>">
@@ -152,7 +162,8 @@ function showAllResults(){
 
   $dbc = mysqli_connect('localhost','root','Jyothi123','movie_hunger') or die("Couldn't connect to databse at line 20");
 
-  if(!empty($_GET['searchString']) && empty($_GET['directorSearch']) && empty($_GET['actorSearch'])){//if searchString is set search for the movie
+  //if user searches movie in search box
+  if(!empty($_GET['searchString']) && empty($_GET['directorSearch']) && empty($_GET['actorSearch'])){
 
     // $searchStringDup = $_GET['searchString'];
     // $searchString = $_GET['searchString'];
@@ -181,6 +192,7 @@ function showAllResults(){
         $results = mysqli_query($dbc, $query);
 
         echo '<div class="container">';
+        showGenres();
         while($row = mysqli_fetch_array($results)){
           ?>
           <a href="view.php?movieId=<?php echo $row['id']; ?>">
@@ -235,32 +247,13 @@ function showAllResults(){
 
     }
 
-  }else if(!isset($_GET['genreId']) && !isset($_GET['curPage']) && empty($_GET['searchString']) && !isset($_GET['actorSearch']) && !isset($_GET['directorSearch'])){//if the searchString is empty show search bars
-    //showAllResults()
+  }else if(!isset($_GET['genreId']) && !isset($_GET['curPage']) && empty($_GET['searchString']) && !isset($_GET['actorSearch']) && !isset($_GET['directorSearch'])){
+    //if the searchString is empty show search bars
+
     echo '<div class="container">';
-    echo '<div class="dropdown float-right">
-          Sort by:  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Genre</button>
-          <div class="dropdown-menu" aria-labelledby="dropdownMenu1">
-            <a class="dropdown-item" href="browse.php?genreId=1">Action</a>
-            <a class="dropdown-item" href="browse.php?genreId=2">Adventure</a>
-            <a class="dropdown-item" href="browse.php?genreId=8">Animation</a>
-            <a class="dropdown-item" href="browse.php?genreId=12">Biography</a>
-            <a class="dropdown-item" href="browse.php?genreId=3">Comedy</a>
-            <a class="dropdown-item" href="browse.php?genreId=9">Crime</a>
-            <a class="dropdown-item" href="browse.php?genreId=6">Drama</a>
-            <a class="dropdown-item" href="browse.php?genreId=14">Family</a>
-            <a class="dropdown-item" href="browse.php?genreId=7">Fantasy</a>
-            <a class="dropdown-item" href="browse.php?genreId=15">History</a>
-            <a class="dropdown-item" href="browse.php?genreId=13">Horror</a>
-            <a class="dropdown-item" href="browse.php?genreId=17">Musical</a>
-            <a class="dropdown-item" href="browse.php?genreId=11">Mystery</a>
-            <a class="dropdown-item" href="browse.php?genreId=4">Romance</a>
-            <a class="dropdown-item" href="browse.php?genreId=5">Sci-Fi</a>
-            <a class="dropdown-item" href="browse.php?genreId=18">Short</a>
-            <a class="dropdown-item" href="browse.php?genreId=10">Thriller</a>
-            <a class="dropdown-item" href="browse.php?genreId=16">War</a>
-          </div>
-        </div>';
+    showGenres();
+
+    //search boxes
     echo '<div class="container py-5"><form action="browse.php">';
     echo '<div class="form-group">
         <label for="name">Movie Search</label>
@@ -274,7 +267,8 @@ function showAllResults(){
     echo '<button class="btn btn-light float-right" type="submit">Submit</button>';
     echo '</form></div>';
 
-  }else if(!empty($_GET['directorSearch'])){//if user searched for director
+  }else if(!empty($_GET['directorSearch'])){
+    //if user searched for director
 
     $query = "SELECT CONCAT(d.firstName, ' ', d.lastName) AS name, m.id AS id, m.description AS description, m.title AS title FROM movies AS m, director AS d WHERE
               m.director_id=d.id AND (d.firstName LIKE '%".$_GET['directorSearch']."%' OR d.lastName LIKE '%".$_GET['directorSearch']."%' OR CONCAT(d.firstName, ' ', d.lastName) LIKE '%".$_GET['directorSearch']."%')";
@@ -285,16 +279,16 @@ function showAllResults(){
 
       $show;
       while($row = mysqli_fetch_array($results)){
-        if(empty($show)){
+        if( empty($show) ){
           echo '<div class="alert alert-info" role="alert">Showing movies of director <strong>'.$row['name'].'</strong>.</div>';
-          $show = "done";
+          $show = "not empty";
         }
         $id = $row['id'];
         $title = $row['title'];
         $description = $row['description'];
-        echo '<a href="userView.php?movieId='.$id.'">
+        echo '<a href="view.php?movieId='.$id.'">
                 <div class="media mb-3">
-                  <img style=" width:100px; " class="mr-3 align-self-center" src="../images/posters/'.$title."(main).jpg".'">
+                  <img style=" width:100px; " class="mr-3 align-self-center" src="images/posters/'.$title."(main).jpg".'">
                   <div class="media-body  text-white">
                     <h5>'.$title.'</h5>
                     <div class="text-secondary">'.$description.'</div>
@@ -306,9 +300,10 @@ function showAllResults(){
         echo '<div class="alert alert-danger" role="alert"><strong>UH! OH!</strong> Seems like we don\'t have such a director in the database. No Wories you have lot more than that.</div>';
         showAllResults();
       }
-      echo '</div>';// close div container from line 258
+      echo '</div>';
 
-  }else if(!empty($_GET['actorSearch'])){//if user seached for actor
+  }else if(!empty($_GET['actorSearch'])){
+    //if user seached for actor
 
     $query = "SELECT DISTINCT m.id AS id, m.description AS description, m.title AS title, CONCAT(a.firstName, ' ', a.lastName) AS name FROM movies AS m, actors AS a, movie_actors AS ma
               WHERE m.id=ma.movie_id AND ma.actor_id=a.id AND (a.firstName LIKE '%".$_GET['actorSearch']."%' OR a.lastName LIKE '%".$_GET['actorSearch']."%' OR CONCAT(a.firstName, ' ', a.lastName) LIKE '%".$_GET['actorSearch']."%')";
@@ -326,9 +321,9 @@ function showAllResults(){
         $id = $row['id'];
         $title = $row['title'];
         $description = $row['description'];
-        echo '<a href="userView.php?movieId='.$id.'">
+        echo '<a href="view.php?movieId='.$id.'">
                 <div class="media mb-3">
-                  <img style=" width:100px; " class="mr-3 align-self-center" src="../images/posters/'.$title."(main).jpg".'">
+                  <img style=" width:100px; " class="mr-3 align-self-center" src="images/posters/'.$title."(main).jpg".'">
                   <div class="media-body  text-white">
                     <h5>'.$title.'</h5>
                     <div class="text-secondary">'.$description.'</div>
