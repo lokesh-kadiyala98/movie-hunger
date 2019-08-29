@@ -1,5 +1,6 @@
 <?php
 	session_start();
+	require('../utills/DBConnect.php');
 ?>
 <html>
 	<head>
@@ -50,8 +51,6 @@
 
 <?php
 
-			$dbc = mysqli_connect('localhost', 'root', 'Jyothi123', 'movie_hunger') or die("couldn't connect to DB at line 46");
-
       if(isset($_POST['updateProfile'])){
 
           $query = "SELECT * FROM users WHERE email='".$_SESSION['email']."' AND password='".$_POST['oldPassword']."'";
@@ -81,81 +80,6 @@
           }
 
       }
-
-			// if(isset($_POST['setGenre'])){
-			// 		$flag = 0;
-			// 		$query = "SELECT id FROM users WHERE email='".$_SESSION['email']."'";
-			// 		$results = mysqli_query($dbc, $query);
-			// 		$userId = mysqli_fetch_array($results);
-			//
-			// 		$query = "INSERT INTO user_genre_personalize VALUES";
-			// 		$queryAppend = array();
-			// 		if(isset($_POST['Action'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Action'].")");
-			// 		}
-			// 		if(isset($_POST['Adventure'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Adventure'].")");
-			// 		}
-			// 		if(isset($_POST['Animation'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Animation'].")");
-			// 		}
-			// 		if(isset($_POST['Biography'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Biography'].")");
-			// 		}
-			// 		if(isset($_POST['Comedy'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Comedy'].")");
-			// 		}
-			// 		if(isset($_POST['Crime'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Crime'].")");
-			// 		}
-			// 		if(isset($_POST['Drama'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Drama'].")");
-			// 		}
-			// 		if(isset($_POST['Family'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Family'].")");
-			// 		}
-			// 		if(isset($_POST['Fantasy'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Fantasy'].")");
-			// 		}
-			// 		if(isset($_POST['History'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['History'].")");
-			// 		}
-			// 		if(isset($_POST['Horror'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Horror'].")");
-			// 		}
-			// 		if(isset($_POST['Musical'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Musical'].")");
-			// 		}
-			// 		if(isset($_POST['Mystery'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Mystery'].")");
-			// 		}
-			// 		if(isset($_POST['Romance'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Romance'].")");
-			// 		}
-			// 		if(isset($_POST['Sci-fi'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Sci-fi'].")");
-			// 		}
-			// 		if(isset($_POST['Short'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Short'].")");
-			// 		}
-			// 		if(isset($_POST['Thriller'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['Thriller'].")");
-			// 		}
-			// 		if(isset($_POST['War'])){
-			// 				array_push($queryAppend, "(".$userId['id'].",".$_POST['War'].")");
-			// 		}
-			// 		$query .= implode(", ", $queryAppend);
-			// 		$results = mysqli_query($dbc, $query);
-			// 		if(mysqli_affected_rows($dbc) > 0){
-			// 			  echo '<div class="container"><div class="alert alert-info alert-dismissible">
-			// 					  <button class="close" type="button" data-dismiss="alert"><span>&times;</span></button>
-			// 					  <strong>Thankyou!!</strong> We\'ll make sure you see content as per your favourites.
-			// 			  </div></div>';
-			//
-			// 		}
-			//
-			// }
-
 
       $query = "SELECT * FROM users WHERE email='".$_SESSION['email']."'";
       $results = mysqli_query($dbc, $query);
@@ -241,7 +165,7 @@
 						echo '<div class="row">';
 						// show list of genres not in user favourites
 						while($row = mysqli_fetch_array($genreList)){
-								echo '<div class="col-xl-2 col-md-2 col-sm-3 text-center add-tag mr-5 ml-5 mb-2">'.$row['name'].' <a href="userPersonalize.php?genreId='.$row['id'].'&setGenre"><i class="fas fa-plus"></i></a></div>';
+								echo '<a href="userPersonalize.php?genreId='.$row['id'].'&setGenre"><div class="text-center add-tag mr-1 mb-2">'.$row['name'].'</div></a>';
 						}
 						echo '</div>';
 						// echo  '<button class="btn btn-light float-right" name="setGenre" type="submit">Submit</button>';
@@ -252,7 +176,7 @@
 						echo '<div class="lato display-4">Delete Genre</div>';
 						echo '<div class="row">';
 						while($row = mysqli_fetch_array($results))
-								echo '<div class="col-xl-2 col-md-2 col-sm-3 text-center delete-tag mr-5 ml-5 mb-2">'.$row['name'].' <a href="userPersonalize.php?genreId='.$row['id'].'&deleteGenre"><i class="fas fa-trash"></i></a></div>';
+								echo '<a href="userPersonalize.php?genreId='.$row['id'].'&deleteGenre"><div class="text-center delete-tag mr-1 mb-2">'.$row['name'].'</div></a>';
 						echo '</div>';
 ?>
 					</div>
@@ -264,6 +188,7 @@
 
   }
 ?>
+		<div class="end"></div>
     <script src="../javascript/funtion.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>

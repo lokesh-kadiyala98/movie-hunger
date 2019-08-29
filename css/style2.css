@@ -23,15 +23,16 @@ body {
   font-family: 'Lato', sans-serif;
   word-spacing: .1em;
 }
-.add-tag {
-  background-color: #17a2b8;
+[class*='tag'] {
+  color: white;
   padding: 3px 6px;
   border-radius: 10px;
 }
+.add-tag {
+  background-color: #2ecc71;
+}
 .delete-tag{
-  background-color: #dc3545;
-  padding: 3px 6px;
-  border-radius: 10px;
+  background-color: #e74c3c;
 }
 .fa {
   color: white;

@@ -2,8 +2,8 @@
 
   session_start();
   date_default_timezone_set('Asia/Kolkata');
-  $dbc = mysqli_connect('localhost','root','Jyothi123','movie_hunger') or die("Couldn't connect to database");
-
+  require('../utills/DBConnect.php');
+  
   if(!empty($_SESSION['email']) && isset($_POST['loginProcess']) || !empty($_SESSION['email']) && isset($_POST['signupProcess'])){
     $url = 'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/userHomepage.php?msg=Seems like <b>'.$_SESSION['username'].'</b> is already logged in. Please!! logout and try.';
     header("Location:".$url);

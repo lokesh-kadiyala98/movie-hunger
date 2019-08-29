@@ -1,5 +1,6 @@
 <?php
 	session_start();
+	require('utills/DBConnect.php');
 
 	function getRating($rating){
 
@@ -89,8 +90,6 @@
     </nav>
 
 <?php
-
-			$dbc = mysqli_connect('localhost', 'root', 'Jyothi123', 'movie_hunger') or die("couldn't connect to DB at line 46");
 
 	  	if(isset($_GET['actorId'])){
 
@@ -231,7 +230,8 @@
 
 ?>
 						</div>
-					</div><hr/>
+					</div>
+					<hr/>
 
 					<div class="h4">Similar Movies</div><hr/>
 					<div class="row">

@@ -1,6 +1,6 @@
 <?php
   session_start();
-
+  require('../utills/DBConnect.php');
   function showGenres(){
 ?>
 
@@ -34,15 +34,13 @@
 
   function showAllResults(){
 
-    $dbc = mysqli_connect('localhost','root','Jyothi123','movie_hunger') or die("Couldn't connect to databse");
-
     if(isset($_GET['genreId'])){
       $query = "SELECT m.id, title, description , CONCAT(d.firstName, ' ', d.lastName) AS dirName, g.name FROM movies as m, director as d, genres as g, movie_genre as mg
                 WHERE m.director_id=d.id AND m.id=mg.movie_id AND mg.genre_id=g.id AND g.id=".$_GET['genreId'];
     }else{
       $query = "SELECT * FROM movies";
     }
-    $results = mysqli_query($dbc, $query);
+    $results = mysqli_query($GLOBALS['dbc'], $query);
     $noOfResults = mysqli_num_rows($results);
 
     $stepSize = 10;
@@ -53,9 +51,6 @@
 
     $from = $curPage * $stepSize;
     $reqPages = ceil($noOfResults / $stepSize);
-
-    $query = "SELECT movies.id, title, description , CONCAT(director.firstName, ' ', director.lastName) AS dirName FROM movies, director WHERE movies.director_id=director.id LIMIT ".$from.", ".$stepSize;
-    $results = mysqli_query($dbc, $query);
 
     echo '<div class="container">';
 
@@ -70,7 +65,7 @@
                 WHERE movies.director_id=director.id LIMIT ".$from.", ".$stepSize;
       $extendUrl = "";
     }
-    $results = mysqli_query($dbc, $query);
+    $results = mysqli_query($GLOBALS['dbc'], $query);
     foreach ($results as $row) {
 ?>
         <a href="userView.php?movieId=<?php echo $row['id']; ?>">
@@ -163,8 +158,6 @@
   </nav>
 
 <?php
-
-    $dbc = mysqli_connect('localhost','root','Jyothi123','movie_hunger') or die("Couldn't connect to databse at line 20");
 
     if(!empty($_GET['searchString']) && empty($_GET['directorSearch']) && empty($_GET['actorSearch'])){//if searchString is set search for the movie
 

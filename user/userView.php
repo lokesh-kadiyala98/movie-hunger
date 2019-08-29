@@ -1,6 +1,7 @@
 <?php
 	session_start();
 	date_default_timezone_set('Asia/Kolkata');
+	require('../utills/DBConnect.php');
 
 	function getRating($rating){ //this function is used to display the stars given to movies
 
@@ -144,8 +145,6 @@
 
 <?php
 
-			$dbc = mysqli_connect('localhost', 'root', 'Jyothi123', 'movie_hunger') or die("couldn't connect to DB at line 46");
-
 	  	if(isset($_GET['actorId'])){
 
 				$actorId = $_GET['actorId'];
@@ -228,20 +227,10 @@
 				$results = mysqli_query($dbc, $query) or die("cant issue query");
 				$movieAvgRating = mysqli_fetch_array($results);
 
-				$query = "SELECT m.id id, title, count(*) count FROM movies m, movie_genre mg WHERE m.id=mg.movie_id AND mg.genre_id IN
-									(SELECT genre_id FROM movie_genre WHERE movie_id=".$_GET['movieId'].") GROUP BY id ORDER BY count(*) DESC LIMIT 8 OFFSET 1";
+				$query = "SELECT m.id id, title, count(*) count FROM movies m, movie_genre mg WHERE m.id=mg.movie_id AND mg.movie_id!=".$_GET['movieId']." AND mg.genre_id IN
+									(SELECT genre_id FROM movie_genre WHERE movie_id=".$_GET['movieId'].") GROUP BY id ORDER BY count(*) DESC LIMIT 8";
 				$results = mysqli_query($dbc, $query);
 				$similarMovies = $results;
-
-				$query = "(SELECT CONCAT(u.firstName,' ',u.lastName) AS userName, u.id, DATE_FORMAT(timeStamp, \"%b %D, %Y\") AS timeStamp, rating, review, '<i class=\"gold fas fa-award\"></i>' AS activeUser
-										FROM movies AS m, director AS d, users AS u, movie_reviews AS mr
-										WHERE m.director_id=d.id AND m.id=mr.movie_id AND mr.user_id=u.id AND u.active_user=1 AND mr.review IS NOT NULL AND m.id=".$_GET['movieId'].")
-										UNION
-										(SELECT CONCAT(u.firstName,' ',u.lastName) AS userName, u.id,	DATE_FORMAT(timeStamp, \"%b %D, %Y\") AS timeStamp, rating, review, '' AS activeUser
-										FROM movies AS m, director AS d, users AS u, movie_reviews AS mr
-										WHERE m.director_id=d.id AND m.id=mr.movie_id AND mr.user_id=u.id AND u.active_user=0 AND mr.review IS NOT NULL AND m.id=".$_GET['movieId'].")";
-				$results = mysqli_query($dbc, $query) or die("error");
-				$movieReviews = $results;
 
 ?>
 				<div class="container" style="margin-bottom: 50px;">
@@ -288,89 +277,93 @@
 					</div><hr>
 
 					<div class="h4">Similar Movies</div><hr/>
-					<div class="row">
 <?php
 						while($row = mysqli_fetch_array($similarMovies)){
 							echo '<a href="userView.php?movieId='.$row['id'].'"><img style="width: 100px;" class="mr-3 mb-2" src="../images/posters/'.$row['title'].'(main).jpg"></a>';
 						}
 ?>
-					</div>
 
-					<div class="h4" id="reviewSection">Reviews</div><hr><br>
+				<div class="h4" id="reviewSection">Reviews</div><hr><br>
 <?php
 
-					if(isset($_GET['submitReview'])){  //if user gives review
-
-							if(empty($_GET['rating'])){  //check if rating is empty
-									echo '<div class="alert alert-danger" role="alert"><strong>No Way!</strong> Rating isn\'t optional.</a></div>';
-							}else if(!empty($_GET['review'])){  //if review is not empty insert rating & review
-									$review = mysqli_real_escape_string($dbc, $_GET['review']);
-									$review = addslashes($review);
-									$query = "INSERT INTO movie_reviews(user_id, movie_id, rating, review)
-														VALUES((SELECT id FROM users WHERE email='".$_SESSION['email']."'),". $_GET['movieId'].",". $_GET['rating'].",'".$review."')";
-									$results = mysqli_query($dbc, $query);
-									if(mysqli_affected_rows($dbc) == 1){
-											echo '<div class="alert alert-success" role="alert"><strong>Roger!</strong> Thanks for giving your review to us.</div>';
-
-											$query = "CALL setActiveUser((SELECT id FROM users WHERE email='".$_SESSION['email']."'))";
-											$results = mysqli_query($dbc, $query);
-											if(mysqli_affected_rows($dbc) == 1){
-												echo '<div class="container alert alert-light alert-dismissible"><button class="close" type="button" data-dismiss="alert"><span>×</span></button>On cloud nine</strong> You have been tagged as gold user for your contribution for our website.<i class="size-large ml-3 gold fas fa-award"></i></div>';
-											}
-									}
-							}else{  //if review is empty insert only rating
-									$query = "INSERT INTO movie_reviews(user_id, movie_id, rating)
-														VALUES((SELECT id FROM users WHERE email='".$_SESSION['email']."'),". $_GET['movieId'].",". $_GET['rating'].")";
-									$results = mysqli_query($dbc, $query);
-									if(mysqli_affected_rows($dbc) == 1){
-											echo '<div class="alert alert-success" role="alert"><strong>Roger!</strong> Thanks for giving your rating to us.</div>';
-
-											$query = "CALL setActiveUser((SELECT id FROM users WHERE email='".$_SESSION['email']."'))";
-											$results = mysqli_query($dbc, $query);
-											if(mysqli_affected_rows($dbc) == 1){
-												echo '<div class="container alert alert-light alert-dismissible"><button class="close" type="button" data-dismiss="alert"><span>×</span></button>On cloud nine</strong> You have been tagged as gold user for your contribution for our website.<i class="size-large ml-3 gold fas fa-award"></i></div>';
-											}
-									}
+				if(isset($_GET['submitReview'])){  //if user gives review
+					if(empty($_GET['rating'])){  //check if rating is empty
+						echo '<div class="alert alert-danger" role="alert"><strong>No Way!</strong> Rating isn\'t optional.</a></div>';
+					}else if(!empty($_GET['review'])){  //if review is not empty insert rating & review
+						$review = mysqli_real_escape_string($dbc, $_GET['review']);
+						$review = addslashes($review);
+						$query = "INSERT INTO movie_reviews(user_id, movie_id, rating, review)
+											VALUES((SELECT id FROM users WHERE email='".$_SESSION['email']."'),". $_GET['movieId'].",". $_GET['rating'].",'".$review."')";
+						$results = mysqli_query($dbc, $query);
+						if(mysqli_affected_rows($dbc) == 1){
+							echo '<div class="alert alert-success" role="alert"><strong>Roger!</strong> Thanks for giving your review to us.</div>';
+							$query = "CALL setActiveUser((SELECT id FROM users WHERE email='".$_SESSION['email']."'))";
+							$results = mysqli_query($dbc, $query);
+							if(mysqli_affected_rows($dbc) == 1){
+								echo '<div class="container alert alert-light alert-dismissible"><button class="close" type="button" data-dismiss="alert"><span>×</span></button>On cloud nine</strong> You have been tagged as gold user for your contribution for our website.<i class="size-large ml-3 gold fas fa-award"></i></div>';
 							}
-					}
-
-					if(isset($_GET['updateReview'])){
-
-						if(empty($_GET['rating'])){  //check if rating is empty
-								echo '<div class="alert alert-danger" role="alert"><strong>No Way!</strong> Rating isn\'t optional.</a></div>';
-						}else if(!empty($_GET['review'])){  //if review is not empty insert rating & review
-								$review = mysqli_real_escape_string($dbc, $_GET['review']);
-								$review = addslashes($review);
-								$query = "UPDATE movie_reviews SET rating=".$_GET['rating'].", review='".$review."', timeStamp='".date("Y-m-d H:i:s")."'
-													WHERE user_id=(SELECT id FROM users WHERE email='".$_SESSION['email']."') AND movie_id=".$_GET['movieId'];
-								$results = mysqli_query($dbc, $query) or die("Error in non empty review updation");
+						}
+					}else{  //if review is empty insert only rating
+						$query = "INSERT INTO movie_reviews(user_id, movie_id, rating)
+											VALUES((SELECT id FROM users WHERE email='".$_SESSION['email']."'),". $_GET['movieId'].",". $_GET['rating'].")";
+						$results = mysqli_query($dbc, $query);
+						if(mysqli_affected_rows($dbc) == 1){
+								echo '<div class="alert alert-success" role="alert"><strong>Roger!</strong> Thanks for giving your rating to us.</div>';
+								$query = "CALL setActiveUser((SELECT id FROM users WHERE email='".$_SESSION['email']."'))";
+								$results = mysqli_query($dbc, $query);
 								if(mysqli_affected_rows($dbc) == 1){
-										echo '<div class="alert alert-success" role="alert"><strong>Roger!</strong> Thanks for updating your review to us.</div>';
-								}
-						}else{  //if review is empty insert only rating
-								$query = "UPDATE movie_reviews SET rating=".$_GET['rating'].", review=null, timeStamp='".date("Y-m-d H:i:s")."'
-													WHERE user_id=(SELECT id FROM users WHERE email='".$_SESSION['email']."') AND movie_id=".$_GET['movieId'];
-								$results = mysqli_query($dbc, $query) or die("Error in empty review updation");
-								if(mysqli_affected_rows($dbc) == 1){
-										echo '<div class="alert alert-success" role="alert"><strong>Roger!</strong> Thanks for updating your rating to us.</div>';
+									echo '<div class="container alert alert-light alert-dismissible"><button class="close" type="button" data-dismiss="alert"><span>×</span></button>On cloud nine</strong> You have been tagged as gold user for your contribution for our website.<i class="size-large ml-3 gold fas fa-award"></i></div>';
 								}
 						}
-
 					}
+				}
 
-					while($row = mysqli_fetch_array($movieReviews)){  //display all the movie reviews
+				if(isset($_GET['updateReview'])){
 
-						if ($row['userName'] == $_SESSION['username']){  //the review belongs to current user
-							echo '<blockquote class="bg-secondary p-2 blockquote line"><p>'.stripslashes($row['review']).'</p>';
-							echo '<footer class="blockquote-footer text-right text-capitalize text-white">'.$row['userName'].' '.$row['activeUser'].' @ '.$row['timeStamp'].' '.getRating($row['rating']).'</footer>';
-							echo '</blockquote>';
-						}else{
-							echo '<blockquote class="blockquote line"><p>'.stripslashes($row['review']).'</p>';
-							echo '<footer class="blockquote-footer text-right text-capitalize">'.$row['userName'].' '.$row['activeUser'].' @ '.$row['timeStamp'].' '.getRating($row['rating']).'</footer>';
-							echo '</blockquote>';
+					if(empty($_GET['rating'])){  //check if rating is empty
+						echo '<div class="alert alert-danger" role="alert"><strong>No Way!</strong> Rating isn\'t optional.</a></div>';
+					}else if(!empty($_GET['review'])){  //if review is not empty insert rating & review
+						$review = mysqli_real_escape_string($dbc, $_GET['review']);
+						$review = addslashes($review);
+						$query = "UPDATE movie_reviews SET rating=".$_GET['rating'].", review='".$review."', timeStamp='".date("Y-m-d H:i:s")."'
+											WHERE user_id=(SELECT id FROM users WHERE email='".$_SESSION['email']."') AND movie_id=".$_GET['movieId'];
+						$results = mysqli_query($dbc, $query) or die("Error in non empty review updation");
+						if(mysqli_affected_rows($dbc) == 1){
+							echo '<div class="alert alert-success" role="alert"><strong>Roger!</strong> Thanks for updating your review to us.</div>';
 						}
-
+					}else{  //if review is empty insert only rating
+						$query = "UPDATE movie_reviews SET rating=".$_GET['rating'].", review=null, timeStamp='".date("Y-m-d H:i:s")."'
+											WHERE user_id=(SELECT id FROM users WHERE email='".$_SESSION['email']."') AND movie_id=".$_GET['movieId'];
+						$results = mysqli_query($dbc, $query) or die("Error in empty review updation");
+						if(mysqli_affected_rows($dbc) == 1){
+							echo '<div class="alert alert-success" role="alert"><strong>Roger!</strong> Thanks for updating your rating to us.</div>';
+						}
 					}
+				}
+
+				$query = "(SELECT CONCAT(u.firstName,' ',u.lastName) AS userName, u.id, DATE_FORMAT(timeStamp, \"%b %D, %Y\") AS timeStamp, rating, review, '<i class=\"gold fas fa-award\"></i>' AS activeUser
+										FROM movies AS m, director AS d, users AS u, movie_reviews AS mr
+										WHERE m.director_id=d.id AND m.id=mr.movie_id AND mr.user_id=u.id AND u.active_user=1 AND mr.review IS NOT NULL AND m.id=".$_GET['movieId'].")
+										UNION
+										(SELECT CONCAT(u.firstName,' ',u.lastName) AS userName, u.id,	DATE_FORMAT(timeStamp, \"%b %D, %Y\") AS timeStamp, rating, review, '' AS activeUser
+										FROM movies AS m, director AS d, users AS u, movie_reviews AS mr
+										WHERE m.director_id=d.id AND m.id=mr.movie_id AND mr.user_id=u.id AND u.active_user=0 AND mr.review IS NOT NULL AND m.id=".$_GET['movieId'].")";
+				$results = mysqli_query($dbc, $query) or die("error");
+				$movieReviews = $results;
+
+				while($row = mysqli_fetch_array($movieReviews)){  //display all the movie reviews
+
+					if ($row['userName'] == $_SESSION['username']){  //the review belongs to current user
+						echo '<blockquote class="bg-secondary p-2 blockquote line"><p>'.stripslashes($row['review']).'</p>';
+						echo '<footer class="blockquote-footer text-right text-capitalize text-white">'.$row['userName'].' '.$row['activeUser'].' @ '.$row['timeStamp'].' '.getRating($row['rating']).'</footer>';
+						echo '</blockquote>';
+					}else{
+						echo '<blockquote class="blockquote line"><p>'.stripslashes($row['review']).'</p>';
+						echo '<footer class="blockquote-footer text-right text-capitalize">'.$row['userName'].' '.$row['activeUser'].' @ '.$row['timeStamp'].' '.getRating($row['rating']).'</footer>';
+						echo '</blockquote>';
+					}
+
+				}
 					echo '<br>';
 
 					//set/update reviews section
